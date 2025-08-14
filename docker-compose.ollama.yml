@@ -1,5 +1,3 @@
-version: '3.8'
-
 # Optional Ollama service - run this separately if you want Ollama on the same server
 # Usage: docker-compose -f docker-compose.ollama.yml up -d
 
