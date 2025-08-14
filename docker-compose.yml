@@ -23,8 +23,8 @@ services:
       - DISPLAY=:99
       # Chrome flags for container environment
       - CHROME_FLAGS=--no-sandbox --disable-dev-shm-usage --disable-gpu --headless --disable-blink-features=AutomationControlled
-    networks:
-      - scraper-network
+      # Optional: External Ollama server URL (change IP as needed)
+      # - OLLAMA_URL=http://192.168.1.100:11434
     restart: unless-stopped
     # Increase shared memory for Chrome
     shm_size: '2gb'
@@ -33,30 +33,3 @@ services:
       - seccomp:unconfined
     cap_add:
       - SYS_ADMIN
-
-  # Optional: Ollama service for AI summaries
-  ollama:
-    image: ollama/ollama:latest
-    container_name: ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama-data:/root/.ollama
-    networks:
-      - scraper-network
-    restart: unless-stopped
-    # Pull the model on startup
-    command: serve
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-networks:
-  scraper-network:
-    driver: bridge
-
-volumes:
-  ollama-data:
-    driver: local

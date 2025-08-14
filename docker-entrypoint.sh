@@ -31,20 +31,15 @@ google-chrome --version
 echo "ChromeDriver version:"
 chromedriver --version 2>/dev/null || echo "ChromeDriver not found in PATH"
 
-# If Ollama model is specified, try to pull it
-if [ -n "$OLLAMA_MODEL" ]; then
-    echo "Checking Ollama model: $OLLAMA_MODEL"
-    # Wait for Ollama service to be ready
-    for i in {1..30}; do
-        if curl -s http://ollama:11434/api/tags > /dev/null 2>&1; then
-            echo "Ollama service is ready"
-            # Try to pull the model
-            curl -X POST http://ollama:11434/api/pull -d "{\"name\":\"$OLLAMA_MODEL\"}" || true
-            break
-        fi
-        echo "Waiting for Ollama service... ($i/30)"
-        sleep 2
-    done
+# If external Ollama URL is specified, test connection
+if [ -n "$OLLAMA_URL" ]; then
+    echo "Testing connection to external Ollama server: $OLLAMA_URL"
+    if curl -s "$OLLAMA_URL/api/tags" > /dev/null 2>&1; then
+        echo "Successfully connected to Ollama at $OLLAMA_URL"
+    else
+        echo "Warning: Could not connect to Ollama at $OLLAMA_URL"
+        echo "AI summaries will not be available until Ollama is accessible"
+    fi
 fi
 
 # Execute the main command

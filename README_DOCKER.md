@@ -27,27 +27,45 @@ This guide explains how to run the Evergabe scraper and web viewer in Docker con
 
 ## Docker Services
 
-### 1. evergabe-scraper
+### evergabe-scraper
 - Main application container with Chrome installed
 - Runs the Flask web viewer by default
 - Chrome runs in headless mode automatically
 - Port 5005 exposed for web interface
 
-### 2. ollama (optional)
-- AI service for generating summaries
-- Port 11434 exposed for API access
-- Automatically downloads models on startup
+## Connecting to External Ollama Server
+
+The application can connect to an external Ollama server for AI summaries. You have two options:
+
+### Option 1: Via Environment Variable in docker-compose.yml
+Uncomment and modify the OLLAMA_URL in docker-compose.yml:
+```yaml
+environment:
+  - OLLAMA_URL=http://192.168.1.100:11434  # Replace with your Ollama server IP
+```
+
+### Option 2: Via settings.json
+Edit the settings.json file:
+```json
+{
+  "ollama": {
+    "base_url": "http://192.168.1.100:11434",  // Your Ollama server IP
+    "model": "gemma3:4b"
+  }
+}
+```
+
+### Option 3: Run Ollama locally (optional)
+If you want to run Ollama on the same server:
+```bash
+docker-compose -f docker-compose.ollama.yml up -d
+```
 
 ## Usage
 
-### Running just the web viewer:
+### Running the web viewer:
 ```bash
-docker-compose up evergabe-scraper
-```
-
-### Running with Ollama for AI summaries:
-```bash
-docker-compose up
+docker-compose up -d
 ```
 
 ### Running the scraper directly (instead of web viewer):
