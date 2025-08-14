@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3:*)",
+      "Bash(source:*)",
+      "Bash(pip install:*)",
+      "Bash(python:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(tree:*)",
+      "Bash(timeout:*)",
+      "Bash(grep:*)",
+      "Bash(gh auth:*)",
+      "Bash(gh repo create:*)",
+      "Bash(git init:*)"
+    ],
+    "deny": [],
+    "defaultMode": "acceptEdits"
+  }
+}

@@ -1,0 +1,61 @@
+# Test configuration with limited results
+search:
+  terms:
+    - "LED"
+  max_pages: 1
+  max_results_per_page: 5  # Only process 5 results for testing
+  filter_keywords:
+    - "beleuchtung"
+    - "beleuchtungsanlage"
+    - "led"
+    - "leuchte"
+    - "leuchten"
+    - "straßenbeleuchtung"
+  use_word_boundaries: true
+  early_filter: true
+  skip_duplicates: true
+  exclude_keywords: []
+
+browser:
+  headless: false
+  window_width: 1920
+  window_height: 1080
+  use_profile: true
+  profile_directory: ""
+
+timing:
+  page_load_timeout: 10
+  element_wait_timeout: 10
+  smart_wait_min: 0.5
+  smart_wait_max: 2.0
+  wait_after_login: 1.0
+  wait_after_search: 1.5
+  wait_after_click: 0.5
+  wait_between_results: 0.5
+  wait_for_detail_page: 0.5
+  max_retries: 3
+  retry_delay: 1.0
+
+login:
+  login_url: "https://www.evergabe.de/anmelden"
+  search_url: "https://www.evergabe.de/auftraege/auftrag-suchen"
+  max_attempts: 3
+
+output:
+  directory: "output"
+  formats:
+    - json
+    - excel
+  include_timestamp: true
+  save_debug_html: false
+
+cookies:
+  auto_handle: true
+  remove_usercentrics: true
+  handling_method: "reject"
+
+logging:
+  level: "INFO"
+  log_to_file: true
+  log_file: "logs/scraper.log"
+  show_progress: true

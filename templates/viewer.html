@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evergabe Results Viewer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>🔍 Evergabe Ausschreibungen Viewer</h1>
+            <div class="header-info">
+                <span class="file-selector">
+                    <label for="file-select">Datei:</label>
+                    <select id="file-select" onchange="loadFile(this.value)">
+                        {% for file in files %}
+                        <option value="{{ file.filename }}" {% if file.filename == current_file %}selected{% endif %}>
+                            {{ file.timestamp }} ({{ (file.size / 1024) | round(1) }} KB)
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <button class="refresh-btn" onclick="refreshFiles()" title="Nach neuen Dateien suchen">🔄</button>
+                </span>
+                <button class="settings-btn" onclick="openSettings()" title="Einstellungen">⚙️</button>
+                <button class="scraper-btn" onclick="runScraper()" title="Scraper starten" id="scraper-btn">
+                    <span class="scraper-text">🔄 Scraper starten</span>
+                    <span class="scraper-spinner" style="display: none;">⏳</span>
+                </button>
+                <span class="total-count">Gesamt: {{ total }} Ergebnisse</span>
+            </div>
+        </header>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Suche nach Titel, Beschreibung, Auftraggeber..." onkeyup="searchResults()">
+            <button onclick="clearSearch()">✕</button>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <button id="prev-btn" onclick="navigate(-1)" disabled>← Vorherige</button>
+            <span id="current-position">1 / {{ total }}</span>
+            <button id="next-btn" onclick="navigate(1)" {% if total <= 1 %}disabled{% endif %}>Nächste →</button>
+        </div>
+
+        <!-- Results Container -->
+        <div id="results-container">
+            <div id="result-cards">
+                {% for result in results %}
+                <div class="result-card" data-index="{{ loop.index0 }}" style="{% if loop.index0 != 0 %}display: none;{% endif %}">
+                    <!-- Title Section -->
+                    <div class="card-header">
+                        <h2>{{ result.title or 'Kein Titel' }}</h2>
+                        <span class="search-term">Suchbegriff: {{ result.search_term }}</span>
+                    </div>
+
+                    <!-- Main Info Grid -->
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Auftraggeber:</label>
+                            <p>{{ result.contracting_authority or 'N/A' }}</p>
+                        </div>
+                        
+                        <div class="info-item">
+                            <label>Ort:</label>
+                            <p>{{ result.location or 'N/A' }}</p>
+                        </div>
+                        
+                        <div class="info-item">
+                            <label>Angebotsfrist:</label>
+                            <p class="deadline {% if result.deadline %}highlight{% endif %}">
+                                {{ result.deadline or 'Keine Frist angegeben' }}
+                            </p>
+                        </div>
+                        
+                        <div class="info-item">
+                            <label>Vergabe-ID:</label>
+                            <p>{{ result.vergabe_id or 'N/A' }}</p>
+                        </div>
+                        
+                        <div class="info-item">
+                            <label>Referenznummer:</label>
+                            <p>{{ result.reference or 'N/A' }}</p>
+                        </div>
+                        
+                        <div class="info-item">
+                            <label>Verfahrensart:</label>
+                            <p>{{ result.procedure_type or 'N/A' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Description Section -->
+                    {% if result.description %}
+                    <div class="description-section">
+                        <h3>📝 Beschreibung</h3>
+                        <div class="description-content">
+                            <p>{{ result.description }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- AI Summary Section -->
+                    <div class="ai-section">
+                        <div class="ai-header">
+                            <h3>🤖 AI Zusammenfassung</h3>
+                            <div class="ai-actions">
+                                {% if result.ai_summary %}
+                                <button class="btn-action regenerate" onclick="generateSummary('{{ current_file }}', {{ loop.index0 }}, true)" title="Zusammenfassung neu generieren">
+                                    🔄 Neu generieren
+                                </button>
+                                {% else %}
+                                <button class="btn-action generate" onclick="generateSummary('{{ current_file }}', {{ loop.index0 }})" title="Zusammenfassung generieren">
+                                    ✨ Generieren
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Always include loading div for regeneration -->
+                        <div class="ai-loading" id="ai-loading-{{ loop.index0 }}" style="display: none;">
+                            <div class="spinner"></div>
+                            <p>AI generiert Zusammenfassung...</p>
+                        </div>
+                        
+                        {% if result.ai_summary %}
+                            <div class="ai-summary" id="ai-summary-{{ loop.index0 }}">
+                                <div id="ai-content-{{ loop.index0 }}"></div>
+                                <script>
+                                    // Convert and display the markdown content
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        const content = {{ result.ai_summary | tojson }};
+                                        const htmlContent = convertMarkdownToHTML(content);
+                                        document.getElementById('ai-content-{{ loop.index0 }}').innerHTML = htmlContent;
+                                    });
+                                </script>
+                            </div>
+                        {% else %}
+                            <div class="ai-placeholder" id="ai-placeholder-{{ loop.index0 }}">
+                                <p>Noch keine AI-Zusammenfassung vorhanden. Klicken Sie auf "Generieren" um eine zu erstellen.</p>
+                            </div>
+                            <div class="ai-summary" id="ai-summary-{{ loop.index0 }}" style="display: none;"></div>
+                        {% endif %}
+                    </div>
+
+                    <!-- CPV Codes -->
+                    {% if result.cpv_codes %}
+                    <div class="cpv-section">
+                        <h3>CPV-Codes</h3>
+                        <p>{{ result.cpv_codes }}</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Period of Performance -->
+                    {% if result.period_of_performance %}
+                    <div class="period-section">
+                        <h3>Leistungszeitraum</h3>
+                        <p>{{ result.period_of_performance }}</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Documents -->
+                    {% if result.documents and result.documents|length > 0 %}
+                    <div class="documents-section">
+                        <h3>Dokumente ({{ result.documents|length }})</h3>
+                        <ul class="document-list">
+                            {% for doc in result.documents %}
+                            <li>
+                                <a href="{{ doc.url }}" target="_blank" rel="noopener">
+                                    📄 {{ doc.name }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <!-- Footer with Links -->
+                    <div class="card-footer">
+                        <a href="{{ result.url }}" target="_blank" class="btn-primary">
+                            🔗 Zur Ausschreibung auf evergabe.de
+                        </a>
+                        <span class="scraped-date">
+                            Erfasst: {{ result.scraped_at | format_date }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Empty State -->
+            {% if not results %}
+            <div class="empty-state">
+                <h2>Keine Ergebnisse gefunden</h2>
+                <p>Es wurden keine Ausschreibungen in der ausgewählten Datei gefunden.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Search Results Summary -->
+        <div id="search-summary" style="display: none;">
+            <p>Gefunden: <span id="search-count">0</span> Ergebnisse</p>
+            <button onclick="clearSearch()">Alle anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ Einstellungen</h2>
+                <span class="close" onclick="closeSettings()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="settings-section">
+                    <h3>Ollama AI Model</h3>
+                    <div class="form-group">
+                        <label for="server-url">Ollama Server URL:</label>
+                        <input type="text" id="server-url" placeholder="http://localhost:11434" value="http://localhost:11434">
+                        <div class="template-help">
+                            Standard: http://localhost:11434 | Beispiel für Remote: http://192.168.1.100:11434
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                        <div style="flex: 1;">
+                            <label for="model-select">Model auswählen:</label>
+                            <select id="model-select">
+                                <option value="loading">Lade Modelle...</option>
+                            </select>
+                        </div>
+                        <button class="btn-refresh-models" onclick="loadModels()" title="Modelle neu laden" style="margin-top: 28px;">🔄</button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="temperature-slider">Temperatur (Kreativität):</label>
+                        <input type="range" id="temperature-slider" min="0" max="1" step="0.1" value="0.3">
+                        <span id="temperature-value">0.3</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="max-tokens">Max. Tokens:</label>
+                        <input type="number" id="max-tokens" min="50" max="10000" value="300">
+                    </div>
+                    
+                    <div class="form-group" id="reasoning-group" style="display: none;">
+                        <label for="reasoning-effort">Reasoning Effort (nur für gpt-oss):</label>
+                        <select id="reasoning-effort">
+                            <option value="low">Low - Schnell, einfache Aufgaben</option>
+                            <option value="medium" selected>Medium - Ausgewogen</option>
+                            <option value="high">High - Gründlich, komplexe Aufgaben</option>
+                        </select>
+                        <div class="template-help">
+                            Nur für gpt-oss Modelle verfügbar. Steuert die Denktiefe des Modells.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>Prompt Template</h3>
+                    <div class="form-group">
+                        <label for="prompt-template">Prompt für Zusammenfassung:</label>
+                        <textarea id="prompt-template" rows="10"></textarea>
+                        <div class="template-help">
+                            Verfügbare Variablen: {context}, {text}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>Batch-Verarbeitung</h3>
+                    <div class="form-group">
+                        <p>Generiere oder erneuere AI-Zusammenfassungen für alle Ergebnisse auf einmal.</p>
+                        <div class="batch-buttons">
+                            <button class="btn-generate-all" onclick="generateAllSummaries(false)">
+                                ✨ Fehlende generieren
+                            </button>
+                            <button class="btn-regenerate-all" onclick="generateAllSummaries(true)">
+                                🔄 Alle neu generieren
+                            </button>
+                        </div>
+                        <div id="batch-progress" style="display: none;">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-fill"></div>
+                            </div>
+                            <p id="progress-text">0 / 0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="resetSettings()">Zurücksetzen</button>
+                <button class="btn-primary" onclick="saveSettings()">Speichern</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scraper Status Indicator -->
+    <div class="scraper-status" id="scraper-status">
+        <div class="scraper-status-spinner"></div>
+        <div class="scraper-status-text">Scraper läuft...</div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

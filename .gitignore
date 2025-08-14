@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Environment variables
+.env
+
+# Output files
+output/
+all_results.json
+all_results.xlsx
+*.csv
+!settings.json
+!config.yaml
+!config_test.yaml
+!package.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Chrome driver
+chromedriver
+geckodriver
+
+# Test files
+test_results.*
+test_*.json
+test_*.xlsx
+debug_*.html
+debug_*.py

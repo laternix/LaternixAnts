@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+debug_*.html
+test_*.py
+old_files/
+*.log
+.git/
+.gitignore
+
+# Keep output directory but not its contents
+output/*
+!output/.gitkeep

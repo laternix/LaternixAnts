@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  evergabe-scraper:
+    build: .
+    container_name: evergabe-scraper
+    ports:
+      - "5005:5005"
+    volumes:
+      # Mount output directory for results
+      - ./output:/app/output
+      # Mount config files
+      - ./config.yaml:/app/config.yaml:ro
+      - ./settings.json:/app/settings.json
+      # Mount .env file for credentials
+      - ./.env:/app/.env:ro
+      # Optional: Mount templates and static for development
+      - ./templates:/app/templates
+      - ./static:/app/static
+    environment:
+      # Force headless mode in container
+      - HEADLESS=true
+      - DISPLAY=:99
+      # Chrome flags for container environment
+      - CHROME_FLAGS=--no-sandbox --disable-dev-shm-usage --disable-gpu --headless --disable-blink-features=AutomationControlled
+    networks:
+      - scraper-network
+    restart: unless-stopped
+    # Increase shared memory for Chrome
+    shm_size: '2gb'
+    # Security options for Chrome
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_ADMIN
+
+  # Optional: Ollama service for AI summaries
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - scraper-network
+    restart: unless-stopped
+    # Pull the model on startup
+    command: serve
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  scraper-network:
+    driver: bridge
+
+volumes:
+  ollama-data:
+    driver: local

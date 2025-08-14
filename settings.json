@@ -1,0 +1,10 @@
+{
+  "ollama": {
+    "base_url": "http://192.168.2.104:11434",
+    "model": "gpt-oss:20b",
+    "temperature": 0.3,
+    "max_tokens": 30000,
+    "prompt_template": "You are a German Tender expert.\n\nClassify this tender with two classes like this:\n\nBeleuchtung: JA\nBeleuchtung: NEIN\n\nThen Continue with the rest of the information\n\nContext:\n{context}\n\nOriginal text:\n{text}\n\nStructure the information.\n\nUse this markdown table format as example:\n\n  | Projekt | Schulcampus Freiham Nord, Neubau |\n  |---------|----------------------------------|\n  | **Ort** | 81671 München (84 km) |\n  | **Auftraggeber** | Landeshauptstadt München, Baureferat |\n\n  | Position | Beschreibung | Einheit | Menge |\n  |----------|-------------|---------|--------|\n  | 1 | Feuchtraumleuchten LED | Stück | 519 |\n  | 2 | Auf-/Anbauleuchten LED | Stück | 600 |\n  | 3 | Lichtkanal System | Meter | 100 |\n  | 4 | Einbauleuchten Decke | Stück | 1.548 |\n  | 5 | Außenleuchten Wand | Stück | 80 |\n  | 6 | Sicherheitsleuchten | Stück | 202 |\n\nAdd or remove columns and rename them as needed.\n\nat the end add a Hinweis: \n",
+    "reasoning_effort": "high"
+  }
+}

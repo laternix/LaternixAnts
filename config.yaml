@@ -1,0 +1,331 @@
+# Evergabe.de Scraper Configuration File
+# ========================================
+
+# Search Configuration
+search:
+  # List of search terms to look for
+  terms:
+    - "leucht"
+    - "lamp"
+    - "licht"
+
+  # Maximum number of pages to process per search term
+  max_pages: 999
+  
+  # Maximum number of results to process per page (0 = all)
+  max_results_per_page: 0
+  
+  # Filter keywords - only keep results containing these words (empty = no filter)
+  # Note: With use_word_boundaries=true, these match whole words only
+  # This prevents "led" from matching "lediglich" or "leder"
+  filter_keywords:
+    # Basic keywords (singular and plural)
+    - "straße"
+    - "straßen"
+    - "lampe"
+    - "lampen"
+    - "leuchte"
+    - "leuchten"
+    - "beleuchtung"
+    - "licht"
+    - "lichter"
+    - "mast"
+    - "masten"
+    - "laterne"
+    - "laternen"
+    - "leuchtmittel"
+    - "leuchtmittelwechsel"
+    - "lichtes"
+    - "lichtkuppel"
+    - "lichtkuppeln"
+    - "lichtkuppels"
+    - "led-leuchten"
+    - "ledleuchten"
+    - "led-straßenleuchten"
+    - "led-scheinwerfer"
+    - "led-laternen"
+    - "led-lampen"
+
+    # Compound words
+    - "mastleuchte"
+    - "mastleuchten"
+    - "straßenleuchte"
+    - "straßenleuchten"
+    - "lichtmast"
+    - "lichtmaste"
+    - "lichtmasten"
+    - "leuchtmast"
+    - "leuchtmasten"
+    - "lampenmast"
+    - "lampenmasten"
+    - "straßenbeleuchtung"
+    - "beleuchtungsanlage"
+    - "straßenbeleuchtungsanlage"
+    - "straßenbeleuchtungskörper"
+    - "straßenlicht"
+    - "außenbeleuchtung"
+    - "außenlicht"
+    - "innenbeleuchtung"
+    - "innenlicht"
+    
+    # Brand names
+    - "siteco"
+    - "sitecolampe"
+    - "sitecomast"
+    - "sitecoleuchte"
+    - "sitecolampen"
+    
+    # Common terms in tenders
+    - "leuchtentausch"
+    - "leuchtenwechsel"
+    - "leuchtenumbau"
+    - "beleuchtungssanierung"
+    - "beleuchtungsumbau"
+    - "beleuchtungsmodernisierung"
+    - "bürobeleuchtung"
+    - "hallenbeleuchtung"
+    - "parkplatzbeleuchtung"
+    - "wegebeleuchtung"
+    - "tunnelbeleuchtung"
+    - "brückenbeleuchtung"
+    - "sporthallenbeleuchtung"
+    - "parkwegebeleuchtung"
+    - "gleisfeldbeleuchtung"
+    - "brunnenbeleuchtung"
+    
+    # Technical lighting terms
+    - "flutlicht"
+    - "flutlichtanlage"
+    - "flutlichtmast"
+    - "flutlichtmasten"
+    - "strahler"
+    - "anbaustrahler"
+    - "deckenstrahler"
+    - "außenstrahler"
+    - "lichttechnik"
+    - "lichtband"
+    - "lichtbänder"
+    - "lichtbandsysteme"
+    - "lichtfarbe"
+    - "lichtsignal"
+    - "lichtsignalanlagen"
+    
+    # Safety lighting
+    - "sicherheitsbeleuchtung"
+    - "sicherheitsbeleuchtungsanlage"
+    - "sicherheitsbeleuchtungsanlagen"
+    - "sicherheitsleuchten"
+    - "notbeleuchtung"
+    - "ersatzbeleuchtung"
+    
+    # Installation/replacement terms
+    - "beleuchtungstausch"
+    - "beleuchtungsarbeiten"
+    - "beleuchtungssteuerung"
+    - "beleuchtungstechnik"
+    - "beleuchtungskörper"
+    - "beleuchtungsmast"
+    - "beleuchtungsmasten"
+    - "stahlrohrmast"
+    - "stahlrohrmasten"
+    - "mastdemontage"
+    - "mastmontage"
+    
+    # Types of lights
+    - "einzelbatterieleuchten"
+    - "feuchtraumleuchten"
+    - "feuchtraumwannenleuchte"
+    - "anbauleuchte"
+    - "aufsatzleuchte"
+    - "aufsatzleuchten"
+    - "außenleuchten"
+    - "bestandsleuchten"
+    - "baustellenleuchten"
+    - "leuchtstofflampen"
+    - "led-leuchten"
+    - "ledleuchten"
+    - "led-straßenleuchten"
+    - "revi-leuchten"
+
+
+  # Use word boundaries for filtering (prevents false matches)
+  # true = match whole words only (LED won't match Leder)
+  # false = match substrings (LED would match Leder)
+  use_word_boundaries: true
+  
+  # Early filtering - check title and description before opening detail pages
+  # true = skip results that don't match keywords (faster)
+  # false = open all results regardless of title (more thorough)
+  early_filter: true
+  
+  # Prevent duplicate results - skip results with same vergabe_id
+  # true = skip duplicates (recommended when searching multiple terms)
+  # false = process all results even if duplicates
+  skip_duplicates: true
+  
+  # Exclusion keywords - results containing these are removed
+  # Useful to filter out unwanted matches
+  exclude_keywords:
+
+
+# Browser Configuration
+browser:
+  # Run browser in headless mode (true/false)
+  headless: true
+  
+  # Browser window size
+  window_width: 1920
+  window_height: 1080
+  
+  # Use persistent Chrome profile (saves cookies/login)
+  use_profile: true
+  
+  # Chrome profile directory (empty = use temp directory)
+  profile_directory: ""
+
+# Timing Configuration (in seconds)
+timing:
+  # Page load timeouts
+  page_load_timeout: 10
+  element_wait_timeout: 10
+  
+  # Smart wait times (adaptive waiting)
+  smart_wait_min: 0.5
+  smart_wait_max: 2.0
+  
+  # Fixed wait times (when necessary)
+  wait_after_login: 1.0
+  wait_after_search: 1.5
+  wait_after_click: 0.5
+  wait_between_results: 0.5
+  wait_for_detail_page: 0.5
+  
+  # Retry configuration
+  max_retries: 3
+  retry_delay: 1.0
+
+# Login Configuration
+login:
+  # Login URL
+  login_url: "https://www.evergabe.de/anmelden"
+  
+  # Search page URL (to verify login)
+  search_url: "https://www.evergabe.de/auftraege/auftrag-suchen"
+  
+  # Maximum login attempts
+  max_attempts: 3
+
+# Output Configuration
+output:
+  # Output directory for results
+  directory: "output"
+  
+  # File formats to save (json, excel, csv)
+  formats:
+    - json
+    - excel
+  
+  # Include timestamp in filename
+  include_timestamp: true
+  
+  # Save debug HTML files
+  save_debug_html: false
+  
+  # Fields to extract from detail pages
+  extract_fields:
+    - title
+    - description
+    - contracting_authority
+    - location
+    - deadline
+    - cpv_codes
+    - reference
+    - vergabe_id
+    - procedure_type
+    - period_of_performance
+    - documents
+    - contact_person
+    - estimated_value
+    - nuts_code
+
+# Cookie Handling
+cookies:
+  # Automatically handle cookie popups
+  auto_handle: true
+  
+  # Remove usercentrics overlay
+  remove_usercentrics: true
+  
+  # Cookie handling method: "reject", "accept", or "remove"
+  handling_method: "reject"
+
+# Logging Configuration
+logging:
+  # Log level: DEBUG, INFO, WARNING, ERROR
+  level: "INFO"
+  
+  # Log to file
+  log_to_file: true
+  
+  # Log file path
+  log_file: "logs/scraper.log"
+  
+  # Show progress bars
+  show_progress: true
+
+# Performance Configuration
+performance:
+  # Use parallel processing for detail pages
+  parallel_details: false
+  
+  # Number of parallel workers (if enabled)
+  max_workers: 3
+  
+  # Cache search results to avoid duplicates
+  use_cache: true
+  
+  # Cache expiry in hours
+  cache_expiry: 24
+
+# Advanced Configuration
+advanced:
+  # User agent string (empty = use default)
+  user_agent: ""
+  
+  # Additional Chrome options
+  chrome_options:
+    - "--no-sandbox"
+    - "--disable-dev-shm-usage"
+    - "--disable-gpu"
+    - "--disable-blink-features=AutomationControlled"
+  
+  # Selenium wire options (for advanced users)
+  wire_options: {}
+  
+  # Custom headers
+  headers: {}
+
+# Notification Configuration (optional)
+notifications:
+  # Enable notifications
+  enabled: false
+  
+  # Email notifications
+  email:
+    enabled: false
+    smtp_server: ""
+    smtp_port: 587
+    from_address: ""
+    to_addresses: []
+    
+  # Webhook notifications
+  webhook:
+    enabled: false
+    url: ""
+    
+# Proxy Configuration (optional)
+proxy:
+  enabled: false
+  http: ""
+  https: ""
+  no_proxy: []
